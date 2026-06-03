@@ -25,6 +25,22 @@ export default function RegisterScreen() {
         return;
       }
 
+      if (!email.includes('@')) {
+        Alert.alert(
+          'Erro',
+          'Informe um email válido'
+        );
+        return;
+      }
+
+      if (senha.length < 6) {
+        Alert.alert(
+          'Erro',
+          'A senha deve ter pelo menos 6 caracteres'
+        );
+        return;
+      }
+
       await register(
         nome,
         email,
@@ -37,10 +53,41 @@ export default function RegisterScreen() {
         'Usuário cadastrado'
       );
     } catch (error: any) {
-      Alert.alert(
-        'Erro',
-        error.message
-      );
+      switch (error.code) {
+        case 'auth/email-already-in-use':
+          Alert.alert(
+            'Erro',
+            'Este email já está cadastrado'
+          );
+          break;
+
+        case 'auth/invalid-email':
+          Alert.alert(
+            'Erro',
+            'Email inválido'
+          );
+          break;
+
+        case 'auth/weak-password':
+          Alert.alert(
+            'Erro',
+            'A senha deve possuir pelo menos 6 caracteres'
+          );
+          break;
+
+        case 'auth/network-request-failed':
+          Alert.alert(
+            'Erro',
+            'Sem conexão com a internet'
+          );
+          break;
+
+        default:
+          Alert.alert(
+            'Erro',
+            'Falha ao realizar cadastro'
+        );
+      }
     }
   }
 

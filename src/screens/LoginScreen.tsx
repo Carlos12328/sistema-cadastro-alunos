@@ -1,18 +1,9 @@
 import { useState } from 'react';
-
-import {
-  View,
-  Text,
-  TextInput,
-  Button,
-  Alert,
-} from 'react-native';
-
+import { View, Text, TextInput, Button, Alert } from 'react-native';
 import { login } from '../services/authService';
 
-export default function LoginScreen({
-  navigation,
-}: any) {
+
+export default function LoginScreen({ navigation }: any) {
 
   const [email, setEmail] =
     useState('');
@@ -25,12 +16,18 @@ export default function LoginScreen({
     try {
 
       if (!email || !senha) {
-
         Alert.alert(
           'Erro',
           'Preencha todos os campos'
         );
+        return;
+      }
 
+      if (!email.includes('@')) {
+        Alert.alert(
+          'Erro',
+          'Informe um email válido'
+        );
         return;
       }
 
@@ -43,10 +40,35 @@ export default function LoginScreen({
 
     } catch (error: any) {
 
-      Alert.alert(
-        'Erro',
-        error.message
-      );
+      switch (error.code) {
+
+        case 'auth/user-not-found':
+          Alert.alert(
+            'Erro',
+            'Usuário não encontrado'
+          );
+          break;
+
+        case 'auth/invalid-credential':
+          Alert.alert(
+            'Erro',
+            'Email ou senha inválidos'
+          );
+          break;
+
+        case 'auth/network-request-failed':
+          Alert.alert(
+            'Erro',
+            'Sem conexão com a internet'
+          );
+          break;
+
+        default:
+          Alert.alert(
+            'Erro',
+            'Falha ao realizar login'
+          );
+      }
 
     }
 
