@@ -1,6 +1,10 @@
-import { View, Text } from 'react-native';
+import { View, Text, Button } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
 
 export default function HomeScreen() {
+
+  const navigation = useNavigation();
+
   return (
     <View
       style={{
@@ -10,6 +14,11 @@ export default function HomeScreen() {
       }}
     >
       <Text>Usuário autenticado</Text>
+
+      <Button
+        title="Ver alunos cadastrados"
+        onPress={() => navigation.navigate('StudentList' as never)}
+      />
     </View>
   );
 }
