@@ -1,16 +1,30 @@
-import { collection, getDocs, query, where } from "firebase/firestore";
+﻿import { collection, getDocs } from "firebase/firestore";
 import { db } from "./firebaseConfig";
 
-export const getStudents = async () => {
-  const q = query(
-    collection(db, "users"),
-    where("role", "==", "aluno")
-  );
+export type Student = {
+  id: string;
+  userId?: string;
+  nomeCompleto?: string;
+  cpf?: string;
+  dataNascimento?: string;
+  email?: string;
+  telefone?: string;
+  curso?: string;
+  status?: string;
+  rgUrl?: string;
+  certificadoUrl?: string;
+  criadoEm?: unknown;
+};
 
-  const snapshot = await getDocs(q);
+export const getStudents = async (): Promise<Student[]> => {
+  const snapshot = await getDocs(collection(db, "alunos"));
 
-  return snapshot.docs.map(doc => ({
+  const students = snapshot.docs.map((doc) => ({
     id: doc.id,
-    ...doc.data()
-  }));
+    ...doc.data(),
+  })) as Student[];
+
+  return students.sort((a, b) =>
+    (a.nomeCompleto || "").localeCompare(b.nomeCompleto || "")
+  );
 };

@@ -1,15 +1,14 @@
-import { NavigationContainer } from '@react-navigation/native';
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import LoginScreen from '../screens/LoginScreen';
-import RegisterScreen from '../screens/RegisterScreen';
-import HomeScreen from '../screens/HomeScreen';
-import { useAuth } from '../context/AuthContext';
-import StudentListScreen from '../screens/StudentListScreen';
+﻿import { NavigationContainer } from "@react-navigation/native";
+import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import LoginScreen from "../screens/LoginScreen";
+import RegisterScreen from "../screens/RegisterScreen";
+import HomeScreen from "../screens/HomeScreen";
+import { useAuth } from "../context/AuthContext";
+import StudentListScreen from "../screens/StudentListScreen";
 
 const Stack = createNativeStackNavigator();
 
 export default function Routes() {
-
   const { user, loading } = useAuth();
 
   if (loading) {
@@ -19,17 +18,18 @@ export default function Routes() {
   return (
     <NavigationContainer>
       <Stack.Navigator>
-
         {user ? (
           <>
             <Stack.Screen
               name="Home"
               component={HomeScreen}
+              options={{ title: "Início" }}
             />
 
             <Stack.Screen
               name="StudentList"
               component={StudentListScreen}
+              options={{ title: "Alunos cadastrados" }}
             />
           </>
         ) : (
@@ -38,13 +38,13 @@ export default function Routes() {
               name="Login"
               component={LoginScreen}
             />
+
             <Stack.Screen
               name="Cadastro"
               component={RegisterScreen}
             />
           </>
         )}
-
       </Stack.Navigator>
     </NavigationContainer>
   );
