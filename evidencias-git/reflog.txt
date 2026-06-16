@@ -1,0 +1,24 @@
+6d13506 HEAD@{0}: pull: Fast-forward
+310b4a8 HEAD@{1}: checkout: moving from main to docs/guia-desenvolvimento
+a4c0d3b HEAD@{2}: pull: Fast-forward
+cdf386b HEAD@{3}: checkout: moving from docs/guia-desenvolvimento to main
+310b4a8 HEAD@{4}: commit: docs: adiciona guia de desenvolvimento do projeto
+fe81735 HEAD@{5}: checkout: moving from develop to docs/guia-desenvolvimento
+fe81735 HEAD@{6}: pull: Fast-forward
+c761eaf HEAD@{7}: checkout: moving from feature/protecao-rotas to develop
+98f75be HEAD@{8}: commit: feat(auth): implementa protecao de rotas
+c761eaf HEAD@{9}: checkout: moving from develop to feature/protecao-rotas
+c761eaf HEAD@{10}: checkout: moving from develop to develop
+c761eaf HEAD@{11}: pull: Fast-forward
+8d08132 HEAD@{12}: checkout: moving from feature/login-firebase to develop
+07ac623 HEAD@{13}: checkout: moving from develop to feature/login-firebase
+8d08132 HEAD@{14}: pull origin develop: Fast-forward
+cdf386b HEAD@{15}: checkout: moving from feature/login-firebase to develop
+07ac623 HEAD@{16}: commit: feat(auth): adiciona validacoes e tratamento de erros
+48e7db7 HEAD@{17}: commit: feat: implementa autenticacao com firebase
+cdf386b HEAD@{18}: checkout: moving from develop to feature/login-firebase
+cdf386b HEAD@{19}: checkout: moving from main to develop
+cdf386b HEAD@{20}: commit: chore: estrutura inicial do projeto
+aeecbd0 HEAD@{21}: Branch: renamed refs/heads/master to refs/heads/main
+aeecbd0 HEAD@{23}: checkout: moving from master to master
+aeecbd0 HEAD@{24}: commit (initial): Initial commit

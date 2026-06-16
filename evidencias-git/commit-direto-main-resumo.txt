@@ -1,0 +1,12 @@
+commit a4c0d3bda0664ffad03149a5f49aa5f6c4d420ac
+Author: Biamedeiros75 <annabeatrizbernardes@gmail.com>
+Date:   Wed Jun 10 21:45:18 2026 -0300
+
+    feat: implementa upload de documentos RG/CPF com otimizacao de imagens
+
+ src/navigation/index.tsx              |  41 +++++--------
+ src/screens/HomeScreen.tsx            |  27 +++++----
+ src/screens/UploadDocumentsScreen.tsx | 109 ++++++++++++++++++++++++++++++++++
+ src/services/imageService.ts          |  90 ++++++++++++++++++++++++++++
+ src/services/storageService.ts        |  18 ++++++
+ 5 files changed, 250 insertions(+), 35 deletions(-)
