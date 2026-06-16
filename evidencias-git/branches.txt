@@ -1,7 +1,0 @@
-  develop
-* docs/guia-desenvolvimento
-  main
-  remotes/origin/develop
-  remotes/origin/docs/guia-desenvolvimento
-  remotes/origin/feature/listagem-alunos
-  remotes/origin/main

@@ -1,9 +1,0 @@
-No ramo docs/guia-desenvolvimento
-Your branch is up to date with 'origin/docs/guia-desenvolvimento'.
-
-Arquivos não monitorados:
-  (utilize "git add <arquivo>..." para incluir o que será submetido)
-	.vscode/
-	evidencias-git/
-
-nada adicionado ao envio mas arquivos não registrados estão presentes (use "git add" to registrar)
