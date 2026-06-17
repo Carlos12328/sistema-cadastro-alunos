@@ -106,8 +106,7 @@ register(
     );
   }
 
-  return
-    userCredential.user;
+  return userCredential.user;
 }
 
 export async function
@@ -123,8 +122,7 @@ login(
       senha
     );
 
-  return
-    userCredential.user;
+  return userCredential.user;
 }
 
 export async function
