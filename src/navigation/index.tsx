@@ -1,29 +1,16 @@
 import { NavigationContainer } from '@react-navigation/native';
-
 import {
   createNativeStackNavigator,
 } from '@react-navigation/native-stack';
 
-import LoginScreen
-from '../screens/LoginScreen';
+import LoginScreen from '../screens/LoginScreen';
+import RegisterScreen from '../screens/RegisterScreen';
+import HomeScreen from '../screens/HomeScreen';
+import UploadDocumentsScreen from '../screens/UploadDocumentsScreen';
+import StudentListScreen from '../screens/StudentListScreen';
+import StudentDetailsScreen from '../screens/StudentDetailsScreen';
 
-import RegisterScreen
-from '../screens/RegisterScreen';
-
-import HomeScreen
-from '../screens/HomeScreen';
-
-import UploadDocumentsScreen
-from '../screens/UploadDocumentsScreen';
-
-import StudentListScreen
-from '../screens/StudentListScreen';
-
-import StudentDetailsScreen
-from '../screens/StudentDetailsScreen';
-
-import { useAuth }
-from '../context/AuthContext';
+import { useAuth } from '../context/AuthContext';
 
 const Stack =
   createNativeStackNavigator();
@@ -49,41 +36,30 @@ export default function Routes() {
 
             <Stack.Screen
               name="Home"
-              component={
-                HomeScreen
-              }
+              component={HomeScreen}
             />
 
             <Stack.Screen
               name="UploadDocuments"
-              component={
-                UploadDocumentsScreen
-              }
+              component={UploadDocumentsScreen}
               options={{
-                title:
-                  'Enviar Documentos',
+                title: 'Enviar Documentos',
               }}
             />
 
             <Stack.Screen
               name="StudentList"
-              component={
-                StudentListScreen
-              }
+              component={StudentListScreen}
               options={{
-                title:
-                  'Alunos',
+                title: 'Alunos',
               }}
             />
 
             <Stack.Screen
               name="StudentDetails"
-              component={
-                StudentDetailsScreen
-              }
+              component={StudentDetailsScreen}
               options={{
-                title:
-                  'Detalhes do Aluno',
+                title: 'Detalhes do Aluno',
               }}
             />
 
@@ -93,16 +69,12 @@ export default function Routes() {
 
             <Stack.Screen
               name="Login"
-              component={
-                LoginScreen
-              }
+              component={LoginScreen}
             />
 
             <Stack.Screen
               name="Cadastro"
-              component={
-                RegisterScreen
-              }
+              component={RegisterScreen}
             />
 
           </>
