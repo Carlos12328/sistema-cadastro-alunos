@@ -1,6 +1,7 @@
 import {
   addDoc,
   collection,
+  getDocs,
   serverTimestamp,
 } from 'firebase/firestore';
 
@@ -36,4 +37,31 @@ export async function createStudent(
     );
 
   return docRef.id;
+}
+
+export async function
+getStudents(): Promise<Student[]> {
+
+  const snapshot =
+    await getDocs(
+      collection(
+        db,
+        'alunos'
+      )
+    );
+
+  const students =
+    snapshot.docs.map(
+      (doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      })
+    ) as Student[];
+
+  return students.sort(
+    (a, b) =>
+      a.nomeCompleto.localeCompare(
+        b.nomeCompleto
+      )
+  );
 }
