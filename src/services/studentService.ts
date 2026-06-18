@@ -1,8 +1,13 @@
-import {
+﻿import {
   addDoc,
   collection,
+  doc,
   getDocs,
+  limit,
+  query,
   serverTimestamp,
+  updateDoc,
+  where,
 } from 'firebase/firestore';
 
 import { db } from './firebaseConfig';
@@ -63,5 +68,62 @@ getStudents(): Promise<Student[]> {
       a.nomeCompleto.localeCompare(
         b.nomeCompleto
       )
+  );
+}
+
+export async function
+getStudentByUserId(
+  userId: string
+): Promise<Student | null> {
+
+  const studentsQuery =
+    query(
+      collection(
+        db,
+        'alunos'
+      ),
+      where(
+        'userId',
+        '==',
+        userId
+      ),
+      limit(1)
+    );
+
+  const snapshot =
+    await getDocs(
+      studentsQuery
+    );
+
+  if (
+    snapshot.empty
+  ) {
+    return null;
+  }
+
+  const studentDoc =
+    snapshot.docs[0];
+
+  return {
+    id: studentDoc.id,
+    ...studentDoc.data(),
+  } as Student;
+}
+
+export async function
+updateStudentCertificateUrl(
+  studentId: string,
+  certificadoUrl: string
+) {
+
+  await updateDoc(
+    doc(
+      db,
+      'alunos',
+      studentId
+    ),
+    {
+      certificadoUrl,
+    }
   );
 }
