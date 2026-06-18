@@ -8,25 +8,18 @@ import { db } from './firebaseConfig';
 export async function getUserRole(
   uid: string
 ) {
-
-  const docRef =
-    doc(
-      db,
-      'users',
-      uid
-    );
+  const docRef = doc(
+    db,
+    'users',
+    uid
+  );
 
   const snapshot =
-    await getDoc(
-      docRef
-    );
+    await getDoc(docRef);
 
-  if (
-    !snapshot.exists()
-  ) {
+  if (!snapshot.exists()) {
     return null;
   }
 
-  return snapshot.data()
-    .role;
+  return snapshot.data().role;
 }
