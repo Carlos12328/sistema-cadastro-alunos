@@ -4,9 +4,12 @@ import {
   doc,
   getDoc,
   getDocs,
+  limit,
   onSnapshot,
+  query,
   serverTimestamp,
   updateDoc,
+  where,
 } from 'firebase/firestore';
 
 import { db } from './firebaseConfig';
@@ -27,12 +30,9 @@ export async function createStudent(
     collection(db, 'alunos'),
     {
       ...student,
-
       status: 'Pendente',
-
       rgUrl: '',
       certificadoUrl: '',
-
       criadoEm: serverTimestamp(),
     }
   );
@@ -77,11 +77,41 @@ export async function getStudentById(
   } as Student;
 }
 
+export async function getStudentByUserId(
+  userId: string
+): Promise<Student | null> {
+  const studentsQuery = query(
+    collection(db, 'alunos'),
+    where('userId', '==', userId),
+    limit(1)
+  );
+
+  const snapshot = await getDocs(
+    studentsQuery
+  );
+
+  if (snapshot.empty) {
+    return null;
+  }
+
+  const studentDoc =
+    snapshot.docs[0];
+
+  return {
+    id: studentDoc.id,
+    ...studentDoc.data(),
+  } as Student;
+}
+
 export async function updateStudentStatus(
   studentId: string,
   status: Student['status']
 ): Promise<void> {
-  const studentRef = doc(db, 'alunos', studentId);
+  const studentRef = doc(
+    db,
+    'alunos',
+    studentId
+  );
 
   const updateData: any = {
     status,
@@ -91,29 +121,56 @@ export async function updateStudentStatus(
     updateData.certificadoUrl = '';
   }
 
-  await updateDoc(studentRef, updateData);
+  await updateDoc(
+    studentRef,
+    updateData
+  );
+}
+
+export async function updateStudentCertificateUrl(
+  studentId: string,
+  certificadoUrl: string
+) {
+  await updateDoc(
+    doc(
+      db,
+      'alunos',
+      studentId
+    ),
+    {
+      certificadoUrl,
+      status: 'Pendente',
+    }
+  );
 }
 
 export function subscribeStudent(
   studentId: string,
-  callback: (student: Student | null) => void
+  callback: (
+    student: Student | null
+  ) => void
 ) {
-  const studentRef = doc(db, 'alunos', studentId);
-
-  const unsubscribe = onSnapshot(
-    studentRef,
-    (snapshot) => {
-      if (!snapshot.exists()) {
-        callback(null);
-        return;
-      }
-
-      callback({
-        id: snapshot.id,
-        ...snapshot.data(),
-      } as Student);
-    }
+  const studentRef = doc(
+    db,
+    'alunos',
+    studentId
   );
+
+  const unsubscribe =
+    onSnapshot(
+      studentRef,
+      (snapshot) => {
+        if (!snapshot.exists()) {
+          callback(null);
+          return;
+        }
+
+        callback({
+          id: snapshot.id,
+          ...snapshot.data(),
+        } as Student);
+      }
+    );
 
   return unsubscribe;
 }
