@@ -60,15 +60,6 @@ export default function HomeScreen({
               )
             }
           />
-
-          <Button
-            title="Abrir detalhes do aluno"
-            onPress={() =>
-              navigation.navigate(
-                'StudentDetails'
-              )
-            }
-          />
         </>
       )}
 
