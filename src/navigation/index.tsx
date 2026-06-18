@@ -12,15 +12,10 @@ import StudentDetailsScreen from '../screens/StudentDetailsScreen';
 
 import { useAuth } from '../context/AuthContext';
 
-const Stack =
-  createNativeStackNavigator();
+const Stack = createNativeStackNavigator();
 
 export default function Routes() {
-
-  const {
-    user,
-    loading,
-  } = useAuth();
+  const { user, loading } = useAuth();
 
   if (loading) {
     return null;
@@ -28,12 +23,9 @@ export default function Routes() {
 
   return (
     <NavigationContainer>
-
       <Stack.Navigator>
-
         {user ? (
           <>
-
             <Stack.Screen
               name="Home"
               component={HomeScreen}
@@ -63,10 +55,16 @@ export default function Routes() {
               }}
             />
 
+            <Stack.Screen
+              name="DetalhesAluno"
+              component={StudentDetailsScreen}
+              options={{
+                title: 'Detalhes do Aluno',
+              }}
+            />
           </>
         ) : (
           <>
-
             <Stack.Screen
               name="Login"
               component={LoginScreen}
@@ -76,12 +74,9 @@ export default function Routes() {
               name="Cadastro"
               component={RegisterScreen}
             />
-
           </>
         )}
-
       </Stack.Navigator>
-
     </NavigationContainer>
   );
 }

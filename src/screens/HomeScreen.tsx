@@ -20,9 +20,7 @@ export default function HomeScreen({
     role,
   } = useAuth();
 
-  async function
-  handleLogout() {
-
+  async function handleLogout() {
     await logout();
   }
 
@@ -30,10 +28,8 @@ export default function HomeScreen({
     <View
       style={{
         flex: 1,
-        justifyContent:
-          'center',
-        alignItems:
-          'center',
+        justifyContent: 'center',
+        alignItems: 'center',
         padding: 20,
         gap: 10,
       }}
@@ -43,11 +39,9 @@ export default function HomeScreen({
         Perfil: {role}
       </Text>
 
-      {role ===
-        'aluno' && (
+      {role === 'aluno' && (
         <Button
-          title=
-            "Enviar documentos"
+          title="Enviar documentos"
           onPress={() =>
             navigation.navigate(
               'UploadDocuments'
@@ -56,24 +50,22 @@ export default function HomeScreen({
         />
       )}
 
-      {role ===
-        'atendente' && (
-        <Button
-          title=
-            "Listar alunos"
-          onPress={() =>
-            navigation.navigate(
-              'StudentList'
-            )
-          }
-        />
+      {role === 'atendente' && (
+        <>
+          <Button
+            title="Listar alunos"
+            onPress={() =>
+              navigation.navigate(
+                'StudentList'
+              )
+            }
+          />
+        </>
       )}
 
       <Button
         title="Sair"
-        onPress={
-          handleLogout
-        }
+        onPress={handleLogout}
       />
 
     </View>

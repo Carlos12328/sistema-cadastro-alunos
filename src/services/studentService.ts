@@ -2,8 +2,10 @@
   addDoc,
   collection,
   doc,
+  getDoc,
   getDocs,
   limit,
+  onSnapshot,
   query,
   serverTimestamp,
   updateDoc,
@@ -24,85 +26,89 @@ export async function createStudent(
     | 'criadoEm'
   >
 ) {
+  const docRef = await addDoc(
+    collection(db, 'alunos'),
+    {
+      ...student,
 
-  const docRef =
-    await addDoc(
-      collection(db, 'alunos'),
-      {
-        ...student,
+      status: 'Pendente',
 
-        status: 'Pendente',
+      rgUrl: '',
+      certificadoUrl: '',
 
-        rgUrl: '',
-        certificadoUrl: '',
-
-        criadoEm:
-          serverTimestamp(),
-      }
-    );
+      criadoEm: serverTimestamp(),
+    }
+  );
 
   return docRef.id;
 }
 
-export async function
-getStudents(): Promise<Student[]> {
+export async function getStudents(): Promise<Student[]> {
+  const snapshot = await getDocs(
+    collection(db, 'alunos')
+  );
 
-  const snapshot =
-    await getDocs(
-      collection(
-        db,
-        'alunos'
-      )
-    );
+  const students = snapshot.docs.map(
+    (docItem) =>
+      ({
+        id: docItem.id,
+        ...docItem.data(),
+      } as Student)
+  );
 
-  const students =
-    snapshot.docs.map(
-      (doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      })
-    ) as Student[];
-
-  return students.sort(
-    (a, b) =>
-      a.nomeCompleto.localeCompare(
-        b.nomeCompleto
-      )
+  return students.sort((a, b) =>
+    a.nomeCompleto.localeCompare(
+      b.nomeCompleto
+    )
   );
 }
 
-export async function
-getStudentByUserId(
-  userId: string
+export async function getStudentById(
+  studentId: string
 ): Promise<Student | null> {
+  const docRef = doc(db, 'alunos', studentId);
 
-  const studentsQuery =
-    query(
-      collection(
-        db,
-        'alunos'
-      ),
-      where(
-        'userId',
-        '==',
-        userId
-      ),
-      limit(1)
-    );
+  const docSnap = await getDoc(docRef);
 
-  const snapshot =
-    await getDocs(
-      studentsQuery
-    );
-
-  if (
-    snapshot.empty
-  ) {
+  if (!docSnap.exists()) {
     return null;
   }
 
-  const studentDoc =
-    snapshot.docs[0];
+  return {
+    id: docSnap.id,
+    ...docSnap.data(),
+  } as Student;
+}
+
+export async function updateStudentStatus(
+  studentId: string,
+  status: Student['status']
+): Promise<void> {
+  const studentRef = doc(db, 'alunos', studentId);
+
+  await updateDoc(studentRef, {
+    status,
+  });
+}
+
+export async function getStudentByUserId(
+  userId: string
+): Promise<Student | null> {
+  const studentsQuery = query(
+    collection(db, 'alunos'),
+    where('userId', '==', userId),
+    limit(1)
+  );
+
+  const snapshot = await getDocs(
+    studentsQuery
+  );
+
+  if (snapshot.empty) {
+    return null;
+  }
+
+  const studentDoc = snapshot.docs[0];
 
   return {
     id: studentDoc.id,
@@ -110,21 +116,38 @@ getStudentByUserId(
   } as Student;
 }
 
-export async function
-updateStudentCertificateUrl(
+export async function updateStudentCertificateUrl(
   studentId: string,
   certificadoUrl: string
-) {
+): Promise<void> {
+  const studentRef = doc(db, 'alunos', studentId);
 
-  await updateDoc(
-    doc(
-      db,
-      'alunos',
-      studentId
-    ),
-    {
-      certificadoUrl,
-      status: 'Pendente',
+  await updateDoc(studentRef, {
+    certificadoUrl,
+    status: 'Pendente',
+  });
+}
+
+export function subscribeStudent(
+  studentId: string,
+  callback: (student: Student | null) => void
+) {
+  const studentRef = doc(db, 'alunos', studentId);
+
+  const unsubscribe = onSnapshot(
+    studentRef,
+    (snapshot) => {
+      if (!snapshot.exists()) {
+        callback(null);
+        return;
+      }
+
+      callback({
+        id: snapshot.id,
+        ...snapshot.data(),
+      } as Student);
     }
   );
+
+  return unsubscribe;
 }
