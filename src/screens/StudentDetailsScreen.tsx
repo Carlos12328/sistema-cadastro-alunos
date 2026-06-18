@@ -6,40 +6,43 @@ import {
   TouchableOpacity,
   Alert,
   ScrollView,
+  ActivityIndicator,
+  Linking,
 } from 'react-native';
+import { useRoute } from '@react-navigation/native';
 
 import { useAuth } from '../context/AuthContext';
-import { getUserRole } from '../services/userService';
+import { Student } from '../types/student';
+import {
+  subscribeStudent,
+  updateStudentStatus,
+} from '../services/studentService';
 
 export default function StudentDetailsScreen() {
-  const { user } = useAuth();
+  const route = useRoute<any>();
+  const { role } = useAuth();
 
-  const [role, setRole] = useState('');
+  const studentId = route.params?.studentId;
 
-  const [aluno, setAluno] = useState({
-    nomeCompleto: 'João Silva',
-    cpf: '123.456.789-00',
-    email: 'joao@email.com',
-    telefone: '(61) 99999-9999',
-    curso: 'Análise e Desenvolvimento de Sistemas',
-    status: 'Pendente',
-    rgUrl: 'Documento enviado',
-    certificadoUrl: 'Documento enviado',
-  });
+  const [aluno, setAluno] = useState<Student | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    async function carregarRole() {
-      if (!user) return;
-
-      const userRole = await getUserRole(user.uid);
-
-      if (userRole) {
-        setRole(userRole);
-      }
+    if (!studentId) {
+      setLoading(false);
+      return;
     }
 
-    carregarRole();
-  }, [user]);
+    const unsubscribe = subscribeStudent(
+      studentId,
+      (student) => {
+        setAluno(student);
+        setLoading(false);
+      }
+    );
+
+    return unsubscribe;
+  }, [studentId]);
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -54,28 +57,45 @@ export default function StudentDetailsScreen() {
     }
   };
 
-  function aprovarAluno() {
-    setAluno({
-      ...aluno,
-      status: 'Aprovado',
-    });
+  async function alterarStatus(
+    novoStatus: 'Aprovado' | 'Rejeitado'
+  ) {
+    if (!studentId) {
+      Alert.alert(
+        'Erro',
+        'Aluno não identificado.'
+      );
+      return;
+    }
 
-    Alert.alert(
-      'Aprovação',
-      'Aluno aprovado com sucesso!'
-    );
+    try {
+      await updateStudentStatus(
+        studentId,
+        novoStatus
+      );
+
+      Alert.alert(
+        'Sucesso',
+        `Aluno ${novoStatus.toLowerCase()} com sucesso!`
+      );
+    } catch {
+      Alert.alert(
+        'Erro',
+        'Não foi possível alterar o status do aluno.'
+      );
+    }
   }
 
-  function rejeitarAluno() {
-    setAluno({
-      ...aluno,
-      status: 'Rejeitado',
-    });
+  function abrirDocumento(url: string) {
+    if (!url) {
+      Alert.alert(
+        'Documento',
+        'Documento ainda não enviado.'
+      );
+      return;
+    }
 
-    Alert.alert(
-      'Rejeição',
-      'Aluno rejeitado.'
-    );
+    Linking.openURL(url);
   }
 
   if (role && role !== 'atendente') {
@@ -83,6 +103,25 @@ export default function StudentDetailsScreen() {
       <View style={styles.accessDeniedContainer}>
         <Text style={styles.accessDeniedText}>
           Acesso restrito aos atendentes.
+        </Text>
+      </View>
+    );
+  }
+
+  if (loading) {
+    return (
+      <View style={styles.accessDeniedContainer}>
+        <ActivityIndicator size="large" />
+        <Text>Carregando aluno...</Text>
+      </View>
+    );
+  }
+
+  if (!aluno) {
+    return (
+      <View style={styles.accessDeniedContainer}>
+        <Text style={styles.accessDeniedText}>
+          Aluno não encontrado.
         </Text>
       </View>
     );
@@ -101,6 +140,10 @@ export default function StudentDetailsScreen() {
 
         <Text style={styles.label}>
           CPF: {aluno.cpf}
+        </Text>
+
+        <Text style={styles.label}>
+          Data de nascimento: {aluno.dataNascimento}
         </Text>
 
         <Text style={styles.label}>
@@ -130,30 +173,42 @@ export default function StudentDetailsScreen() {
           RG / CPF
         </Text>
 
-        <View style={styles.documentBox}>
-          <Text>
+        <TouchableOpacity
+          style={styles.documentBox}
+          onPress={() =>
+            abrirDocumento(aluno.rgUrl)
+          }
+        >
+          <Text style={styles.documentText}>
             {aluno.rgUrl
-              ? 'Documento enviado'
+              ? 'Abrir documento'
               : 'Documento ainda não enviado'}
           </Text>
-        </View>
+        </TouchableOpacity>
 
         <Text style={styles.sectionTitle}>
           Certificado
         </Text>
 
-        <View style={styles.documentBox}>
-          <Text>
+        <TouchableOpacity
+          style={styles.documentBox}
+          onPress={() =>
+            abrirDocumento(aluno.certificadoUrl)
+          }
+        >
+          <Text style={styles.documentText}>
             {aluno.certificadoUrl
-              ? 'Documento enviado'
-              : 'Documento ainda não enviado'}
+              ? 'Abrir certificado'
+              : 'Certificado ainda não enviado'}
           </Text>
-        </View>
+        </TouchableOpacity>
 
         <View style={styles.buttonContainer}>
           <TouchableOpacity
             style={styles.approveButton}
-            onPress={aprovarAluno}
+            onPress={() =>
+              alterarStatus('Aprovado')
+            }
           >
             <Text style={styles.buttonText}>
               Aprovar
@@ -162,7 +217,9 @@ export default function StudentDetailsScreen() {
 
           <TouchableOpacity
             style={styles.rejectButton}
-            onPress={rejeitarAluno}
+            onPress={() =>
+              alterarStatus('Rejeitado')
+            }
           >
             <Text style={styles.buttonText}>
               Rejeitar
@@ -234,6 +291,11 @@ const styles = StyleSheet.create({
     backgroundColor: '#fafafa',
   },
 
+  documentText: {
+    fontWeight: 'bold',
+    color: '#2563eb',
+  },
+
   buttonContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -263,4 +325,3 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
 });
-
