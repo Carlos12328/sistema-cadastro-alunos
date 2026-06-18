@@ -1,4 +1,4 @@
-export type StudentStatus =
+﻿export type StudentStatus =
   | 'Pendente'
   | 'Entregue'
   | 'Aprovado'
