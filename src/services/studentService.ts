@@ -124,6 +124,7 @@ updateStudentCertificateUrl(
     ),
     {
       certificadoUrl,
+      status: 'Pendente',
     }
   );
 }

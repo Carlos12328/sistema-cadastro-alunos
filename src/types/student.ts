@@ -1,5 +1,7 @@
-export type StudentStatus =
+﻿export type StudentStatus =
   | 'Pendente'
+  | 'Aprovado'
+  | 'Rejeitado'
   | 'Entregue';
 
 export interface Student {
