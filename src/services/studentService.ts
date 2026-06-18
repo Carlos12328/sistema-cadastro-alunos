@@ -83,9 +83,15 @@ export async function updateStudentStatus(
 ): Promise<void> {
   const studentRef = doc(db, 'alunos', studentId);
 
-  await updateDoc(studentRef, {
+  const updateData: any = {
     status,
-  });
+  };
+
+  if (status === 'Rejeitado') {
+    updateData.certificadoUrl = '';
+  }
+
+  await updateDoc(studentRef, updateData);
 }
 
 export function subscribeStudent(
