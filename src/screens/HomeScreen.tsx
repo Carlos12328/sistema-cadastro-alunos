@@ -1,45 +1,82 @@
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import {
+  View,
+  Text,
+  Button,
+} from 'react-native';
 
-export default function HomeScreen() {
-  const navigation = useNavigation<any>();
+import {
+  useAuth,
+} from '../context/AuthContext';
+
+import {
+  logout,
+} from '../services/authService';
+
+export default function HomeScreen({
+  navigation,
+}: any) {
+
+  const {
+    role,
+  } = useAuth();
+
+  async function handleLogout() {
+    await logout();
+  }
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Usuário autenticado</Text>
+    <View
+      style={{
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        padding: 20,
+        gap: 10,
+      }}
+    >
 
-      <TouchableOpacity
-        style={styles.button}
-        onPress={() => navigation.navigate('DetalhesAluno')}
-      >
-        <Text style={styles.buttonText}>
-          Abrir Detalhes do Aluno
-        </Text>
-      </TouchableOpacity>
+      <Text>
+        Perfil: {role}
+      </Text>
+
+      {role === 'aluno' && (
+        <Button
+          title="Enviar documentos"
+          onPress={() =>
+            navigation.navigate(
+              'UploadDocuments'
+            )
+          }
+        />
+      )}
+
+      {role === 'atendente' && (
+        <>
+          <Button
+            title="Listar alunos"
+            onPress={() =>
+              navigation.navigate(
+                'StudentList'
+              )
+            }
+          />
+
+          <Button
+            title="Abrir detalhes do aluno"
+            onPress={() =>
+              navigation.navigate(
+                'StudentDetails'
+              )
+            }
+          />
+        </>
+      )}
+
+      <Button
+        title="Sair"
+        onPress={handleLogout}
+      />
+
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-
-  title: {
-    fontSize: 18,
-    marginBottom: 20,
-  },
-
-  button: {
-    backgroundColor: '#2563eb',
-    padding: 12,
-    borderRadius: 8,
-  },
-
-  buttonText: {
-    color: '#fff',
-    fontWeight: 'bold',
-  },
-});

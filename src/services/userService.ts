@@ -1,14 +1,25 @@
-import { doc, getDoc } from 'firebase/firestore';
+import {
+  doc,
+  getDoc,
+} from 'firebase/firestore';
+
 import { db } from './firebaseConfig';
 
-export async function getUserRole(uid: string) {
-  const docRef = doc(db, 'users', uid);
+export async function getUserRole(
+  uid: string
+) {
+  const docRef = doc(
+    db,
+    'users',
+    uid
+  );
 
-  const docSnap = await getDoc(docRef);
+  const snapshot =
+    await getDoc(docRef);
 
-  if (!docSnap.exists()) {
+  if (!snapshot.exists()) {
     return null;
   }
 
-  return docSnap.data().role;
+  return snapshot.data().role;
 }

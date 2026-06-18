@@ -23,7 +23,6 @@ export default function StudentDetailsScreen() {
     telefone: '(61) 99999-9999',
     curso: 'Análise e Desenvolvimento de Sistemas',
     status: 'Pendente',
-
     rgUrl: 'Documento enviado',
     certificadoUrl: 'Documento enviado',
   });
@@ -81,19 +80,8 @@ export default function StudentDetailsScreen() {
 
   if (role && role !== 'atendente') {
     return (
-      <View
-        style={{
-          flex: 1,
-          justifyContent: 'center',
-          alignItems: 'center',
-        }}
-      >
-        <Text
-          style={{
-            fontSize: 18,
-            fontWeight: 'bold',
-          }}
-        >
+      <View style={styles.accessDeniedContainer}>
+        <Text style={styles.accessDeniedText}>
           Acesso restrito aos atendentes.
         </Text>
       </View>
@@ -187,6 +175,17 @@ export default function StudentDetailsScreen() {
 }
 
 const styles = StyleSheet.create({
+  accessDeniedContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+
+  accessDeniedText: {
+    fontSize: 18,
+    fontWeight: 'bold',
+  },
+
   container: {
     flex: 1,
     backgroundColor: '#f5f5f5',
@@ -264,3 +263,4 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
 });
+
