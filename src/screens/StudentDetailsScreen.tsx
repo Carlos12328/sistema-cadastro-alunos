@@ -8,6 +8,7 @@ import {
   ScrollView,
   ActivityIndicator,
   Linking,
+  Image,
 } from 'react-native';
 import { useRoute } from '@react-navigation/native';
 
@@ -190,18 +191,31 @@ export default function StudentDetailsScreen() {
           Certificado
         </Text>
 
-        <TouchableOpacity
-          style={styles.documentBox}
-          onPress={() =>
-            abrirDocumento(aluno.certificadoUrl)
-          }
-        >
-          <Text style={styles.documentText}>
-            {aluno.certificadoUrl
-              ? 'Abrir certificado'
-              : 'Certificado ainda não enviado'}
-          </Text>
-        </TouchableOpacity>
+        {aluno.certificadoUrl ? (
+  <View style={styles.documentBox}>
+    <Image
+      source={{
+        uri: aluno.certificadoUrl,
+      }}
+      style={{
+        width: 250,
+        height: 250,
+        borderRadius: 8,
+      }}
+      resizeMode="contain"
+    />
+
+    <Text style={styles.documentText}>
+      Certificado enviado
+    </Text>
+  </View>
+) : (
+  <View style={styles.documentBox}>
+    <Text style={styles.documentText}>
+      Certificado ainda não enviado
+    </Text>
+  </View>
+)}
 
         <View style={styles.buttonContainer}>
           <TouchableOpacity
