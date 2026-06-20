@@ -20,10 +20,10 @@ Desenvolver um aplicativo mobile em React Native para cadastro de alunos, permit
 * Expo
 * Firebase Authentication
 * Firestore Database
-* Firebase Storage
 * React Navigation
 * expo-image-picker
 * expo-image-manipulator
+* expo-file-system
 * Git
 * GitHub
 
@@ -315,7 +315,7 @@ fix(auth): corrige validacao de login
 
 ---
 
-## Pessoa 3 — Certificados e Storage
+## Pessoa 3 — Certificados e Armazenamento Local
 
 ### Responsável por
 
@@ -420,7 +420,7 @@ fix(auth): corrige validacao de login
 2. Upload de RG/CPF
 3. Tratamento de imagens
 4. Upload de certificado
-5. Integração com Firebase Storage
+5. Salvamento local dos arquivos e vínculo da URI no Firestore
 6. Área do atendente
 7. Validação dos documentos
 8. Controle de perfis
