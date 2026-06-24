@@ -28,6 +28,10 @@ import {
   updateStudentCertificateUrl,
 } from '../services/studentService';
 
+import { 
+  optimizeImage, 
+} from '../services/imageService';
+
 import {
   Student,
 } from '../types/student';
@@ -231,14 +235,25 @@ UploadDocumentsScreen() {
       return;
     }
 
-    const asset =
-      result.assets[0];
+   const asset =
+  result.assets[0];
 
-    setCertificate({
-      uri: asset.uri,
-      fileName: asset.fileName,
-    });
-  }
+console.log('URI ORIGINAL');
+console.log(asset.uri);
+
+const optimizedUri =
+  await optimizeImage(
+    asset.uri
+  );
+
+console.log('URI OTIMIZADA');
+console.log(optimizedUri);
+
+setCertificate({
+  uri: optimizedUri,
+  fileName: asset.fileName,
+});
+}
 
   async function
   handleSaveCertificate() {
@@ -582,11 +597,9 @@ UploadDocumentsScreen() {
         }
       />
 
-      {loading && (
+       {loading && (
         <ActivityIndicator />
       )}
     </ScrollView>
   );
 }
-
-
