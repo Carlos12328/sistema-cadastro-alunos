@@ -11,10 +11,21 @@ import {
   onAuthStateChanged,
 } from 'firebase/auth';
 
-import { auth } from '../services/firebaseConfig';
+import { auth }
+from '../services/firebaseConfig';
+
+import {
+  getUserRole,
+} from '../services/userService';
+
+type UserRole =
+  | 'aluno'
+  | 'atendente'
+  | null;
 
 type AuthContextType = {
   user: User | null;
+  role: UserRole;
   loading: boolean;
 };
 
@@ -30,7 +41,14 @@ export function AuthProvider({
 }) {
 
   const [user, setUser] =
-    useState<User | null>(null);
+    useState<User | null>(
+      null
+    );
+
+  const [role, setRole] =
+    useState<UserRole>(
+      null
+    );
 
   const [loading, setLoading] =
     useState(true);
@@ -40,11 +58,37 @@ export function AuthProvider({
     const unsubscribe =
       onAuthStateChanged(
         auth,
-        (currentUser) => {
+        async (
+          currentUser
+        ) => {
 
-          setUser(currentUser);
+          setUser(
+            currentUser
+          );
 
-          setLoading(false);
+          if (
+            currentUser
+          ) {
+
+            const userRole =
+              await getUserRole(
+                currentUser.uid
+              );
+
+            setRole(
+              userRole
+            );
+
+          } else {
+
+            setRole(
+              null
+            );
+          }
+
+          setLoading(
+            false
+          );
         }
       );
 
@@ -56,6 +100,7 @@ export function AuthProvider({
     <AuthContext.Provider
       value={{
         user,
+        role,
         loading,
       }}
     >
@@ -65,5 +110,7 @@ export function AuthProvider({
 }
 
 export function useAuth() {
-  return useContext(AuthContext);
+  return useContext(
+    AuthContext
+  );
 }
