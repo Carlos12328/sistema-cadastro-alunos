@@ -15,9 +15,7 @@ import {
 
 import * as ImagePicker from 'expo-image-picker';
 
-import {
-  useAuth,
-} from '../context/AuthContext';
+import { useAuth } from '../context/AuthContext';
 
 import {
   saveCertificateLocally,
@@ -28,61 +26,32 @@ import {
   updateStudentCertificateUrl,
 } from '../services/studentService';
 
+import { Student } from '../types/student';
+
 import {
-  Student,
-} from '../types/student';
+  otimizarImagem,
+} from '../services/imageService';
 
 type SelectedCertificate = {
   uri: string;
   fileName?: string | null;
 };
 
-export default function
-UploadDocumentsScreen() {
+export default function UploadDocumentsScreen() {
+  const { user } = useAuth();
 
-  const {
-    user,
-  } = useAuth();
+  const [student, setStudent] = useState<Student | null>(null);
+  const [certificate, setCertificate] = useState<SelectedCertificate | null>(null);
+  const [certificateUri, setCertificateUri] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [loadingStudent, setLoadingStudent] = useState(true);
 
-  const [
-    student,
-    setStudent,
-  ] = useState<Student | null>(
-    null
-  );
+  const hasCertificate = certificateUri.trim().length > 0;
 
-  const [
-    certificate,
-    setCertificate,
-  ] = useState<SelectedCertificate | null>(
-    null
-  );
-
-  const [
-    certificateUri,
-    setCertificateUri,
-  ] = useState('');
-
-  const [
-    loading,
-    setLoading,
-  ] = useState(false);
-
-  const [
-    loadingStudent,
-    setLoadingStudent,
-  ] = useState(true);
-
-  const hasCertificate =
-    certificateUri.trim().length > 0;
-
-  const status =
-    student?.status ||
-    'Não informado';
+  const status = student?.status || 'Não informado';
 
   const documentStatus =
-    !hasCertificate &&
-    student?.status === 'Rejeitado'
+    !hasCertificate && student?.status === 'Rejeitado'
       ? 'Aguardando reenvio'
       : status;
 
@@ -95,9 +64,7 @@ UploadDocumentsScreen() {
     !hasCertificate &&
     !isApprovedStatus;
 
-  function
-  getBlockedMessage() {
-
+  function getBlockedMessage() {
     if (!student) {
       return 'Cadastro do aluno não encontrado.';
     }
@@ -109,9 +76,7 @@ UploadDocumentsScreen() {
     return 'No momento não é possível enviar o certificado.';
   }
 
-  function
-  getStatusMessage() {
-
+  function getStatusMessage() {
     if (
       status === 'Aprovado' ||
       status === 'Entregue'
@@ -119,10 +84,7 @@ UploadDocumentsScreen() {
       return 'Seu certificado foi aprovado.';
     }
 
-    if (
-      status === 'Rejeitado'
-    ) {
-
+    if (status === 'Rejeitado') {
       if (hasCertificate) {
         return 'Seu certificado foi rejeitado, mas ainda existe uma URI vinculada. Aguarde o atendente remover a URI para enviar novamente.';
       }
@@ -130,10 +92,7 @@ UploadDocumentsScreen() {
       return 'Seu certificado foi rejeitado. Você pode enviar um novo certificado.';
     }
 
-    if (
-      status === 'Pendente'
-    ) {
-
+    if (status === 'Pendente') {
       if (hasCertificate) {
         return 'Seu certificado foi enviado e está aguardando análise.';
       }
@@ -145,55 +104,31 @@ UploadDocumentsScreen() {
   }
 
   useEffect(() => {
-
-    async function
-    loadStudent() {
-
+    async function loadStudent() {
       try {
-
         if (!user) {
           return;
         }
 
-        const foundStudent =
-          await getStudentByUserId(
-            user.uid
-          );
+        const foundStudent = await getStudentByUserId(user.uid);
 
-        setStudent(
-          foundStudent
-        );
-
-        setCertificateUri(
-          foundStudent?.certificadoUrl ||
-          ''
-        );
-
+        setStudent(foundStudent);
+        setCertificateUri(foundStudent?.certificadoUrl || '');
       } catch {
-
         Alert.alert(
           'Erro',
           'Falha ao carregar dados do aluno'
         );
-
       } finally {
-
-        setLoadingStudent(
-          false
-        );
+        setLoadingStudent(false);
       }
     }
 
     loadStudent();
-
   }, [user]);
 
-  async function
-  handlePickCertificate() {
-
-    if (
-      !canSendCertificate
-    ) {
+  async function handlePickCertificate() {
+    if (!canSendCertificate) {
       Alert.alert(
         'Envio bloqueado',
         getBlockedMessage()
@@ -205,9 +140,7 @@ UploadDocumentsScreen() {
     const permission =
       await ImagePicker.requestMediaLibraryPermissionsAsync();
 
-    if (
-      !permission.granted
-    ) {
+    if (!permission.granted) {
       Alert.alert(
         'Permissão necessária',
         'Autorize o acesso à galeria para selecionar o certificado.'
@@ -218,33 +151,43 @@ UploadDocumentsScreen() {
 
     const result =
       await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: [
-          'images',
-        ],
+        mediaTypes: ['images'],
         allowsEditing: false,
         quality: 1,
       });
 
-    if (
-      result.canceled
-    ) {
+    if (result.canceled) {
       return;
     }
 
-    const asset =
-      result.assets[0];
-
-    setCertificate({
-      uri: asset.uri,
-      fileName: asset.fileName,
-    });
-  }
-
-  async function
-  handleSaveCertificate() {
+    const asset = result.assets[0];
 
     try {
+      const optimizedImage = await otimizarImagem(
+        asset.uri,
+        asset.width,
+        asset.height
+      );
 
+      setCertificate({
+        uri: optimizedImage.uri,
+        fileName: asset.fileName,
+      });
+
+      Alert.alert(
+        'Imagem otimizada',
+        'A imagem foi comprimida e redimensionada antes do envio.'
+      );
+    } catch {
+      Alert.alert(
+        'Erro',
+        'Não foi possível otimizar a imagem selecionada.'
+      );
+    }
+  }
+
+  async function handleSaveCertificate() {
+    try {
       if (!user) {
         Alert.alert(
           'Erro',
@@ -256,10 +199,7 @@ UploadDocumentsScreen() {
 
       setLoading(true);
 
-      const currentStudent =
-        await getStudentByUserId(
-          user.uid
-        );
+      const currentStudent = await getStudentByUserId(user.uid);
 
       if (
         !currentStudent ||
@@ -273,22 +213,13 @@ UploadDocumentsScreen() {
         return;
       }
 
-      setStudent(
-        currentStudent
-      );
+      setStudent(currentStudent);
 
       const currentCertificateUri =
         currentStudent.certificadoUrl || '';
 
-      if (
-        currentCertificateUri.trim()
-      ) {
-        setCertificateUri(
-          currentCertificateUri
-        );
-
-    
-
+      if (currentCertificateUri.trim()) {
+        setCertificateUri(currentCertificateUri);
         return;
       }
 
@@ -313,41 +244,32 @@ UploadDocumentsScreen() {
         return;
       }
 
-      const localUri =
-        await saveCertificateLocally({
-          userId: user.uid,
-          uri: certificate.uri,
-          fileName: certificate.fileName,
-        });
+      const localUri = await saveCertificateLocally({
+        userId: user.uid,
+        uri: certificate.uri,
+        fileName: certificate.fileName,
+      });
 
       await updateStudentCertificateUrl(
         currentStudent.id,
         localUri
       );
 
-      setCertificateUri(
-        localUri
-      );
+      setCertificateUri(localUri);
 
       setStudent({
         ...currentStudent,
-        certificadoUrl:
-          localUri,
-        status:
-          'Pendente',
+        certificadoUrl: localUri,
+        status: 'Pendente',
       });
 
-      setCertificate(
-        null
-      );
+      setCertificate(null);
 
       Alert.alert(
         'Sucesso',
         'Certificado enviado com sucesso.'
       );
-
     } catch (error) {
-
       console.error(
         'Erro ao salvar certificado:',
         error
@@ -362,30 +284,22 @@ UploadDocumentsScreen() {
         'Erro',
         'Falha ao salvar certificado: ' + errorMessage
       );
-
     } finally {
-
       setLoading(false);
     }
   }
 
-  if (
-    loadingStudent
-  ) {
+  if (loadingStudent) {
     return (
       <View
         style={{
           flex: 1,
-          justifyContent:
-            'center',
-          alignItems:
-            'center',
+          justifyContent: 'center',
+          alignItems: 'center',
         }}
       >
         <ActivityIndicator />
-        <Text>
-          Carregando dados...
-        </Text>
+        <Text>Carregando dados...</Text>
       </View>
     );
   }
@@ -394,8 +308,7 @@ UploadDocumentsScreen() {
     <ScrollView
       contentContainerStyle={{
         flexGrow: 1,
-        justifyContent:
-          'center',
+        justifyContent: 'center',
         padding: 20,
         gap: 16,
       }}
@@ -403,10 +316,8 @@ UploadDocumentsScreen() {
       <Text
         style={{
           fontSize: 22,
-          fontWeight:
-            'bold',
-          textAlign:
-            'center',
+          fontWeight: 'bold',
+          textAlign: 'center',
         }}
       >
         Certificado
@@ -422,28 +333,20 @@ UploadDocumentsScreen() {
       >
         <Text
           style={{
-            fontWeight:
-              'bold',
-            textAlign:
-              'center',
+            fontWeight: 'bold',
+            textAlign: 'center',
           }}
         >
           Status do documento
         </Text>
 
-        <Text
-          style={{
-            textAlign:
-              'center',
-          }}
-        >
+        <Text style={{ textAlign: 'center' }}>
           {documentStatus}
         </Text>
 
         <Text
           style={{
-            textAlign:
-              'center',
+            textAlign: 'center',
             fontSize: 13,
           }}
         >
@@ -454,24 +357,16 @@ UploadDocumentsScreen() {
       {hasCertificate ? (
         <View
           style={{
-            alignItems:
-              'center',
+            alignItems: 'center',
             gap: 8,
           }}
         >
-          <Text
-            style={{
-              fontWeight:
-                'bold',
-            }}
-          >
+          <Text style={{ fontWeight: 'bold' }}>
             Imagem enviada
           </Text>
 
           <Image
-            source={{
-              uri: certificateUri,
-            }}
+            source={{ uri: certificateUri }}
             style={{
               width: 220,
               height: 220,
@@ -482,22 +377,11 @@ UploadDocumentsScreen() {
 
           <Text
             style={{
-              textAlign:
-                'center',
+              textAlign: 'center',
               fontSize: 12,
             }}
           >
             Certificado já vinculado ao cadastro.
-          </Text>
-
-          <Text
-            style={{
-              textAlign:
-                'center',
-              fontSize: 12,
-            }}
-          >
-            
           </Text>
         </View>
       ) : null}
@@ -505,24 +389,16 @@ UploadDocumentsScreen() {
       {!hasCertificate && certificate ? (
         <View
           style={{
-            alignItems:
-              'center',
+            alignItems: 'center',
             gap: 8,
           }}
         >
-          <Text
-            style={{
-              fontWeight:
-                'bold',
-            }}
-          >
-            Certificado selecionado
+          <Text style={{ fontWeight: 'bold' }}>
+            Certificado selecionado e otimizado
           </Text>
 
           <Image
-            source={{
-              uri: certificate.uri,
-            }}
+            source={{ uri: certificate.uri }}
             style={{
               width: 220,
               height: 220,
@@ -530,16 +406,20 @@ UploadDocumentsScreen() {
             }}
             resizeMode="cover"
           />
+
+          <Text
+            style={{
+              textAlign: 'center',
+              fontSize: 12,
+            }}
+          >
+            A imagem foi comprimida e redimensionada antes de ser salva.
+          </Text>
         </View>
       ) : null}
 
       {!hasCertificate ? (
-        <Text
-          style={{
-            textAlign:
-              'center',
-          }}
-        >
+        <Text style={{ textAlign: 'center' }}>
           Selecione a imagem do certificado para salvar no dispositivo e vincular ao cadastro do aluno.
         </Text>
       ) : null}
@@ -547,8 +427,7 @@ UploadDocumentsScreen() {
       {!canSendCertificate ? (
         <Text
           style={{
-            textAlign:
-              'center',
+            textAlign: 'center',
             fontSize: 12,
           }}
         >
@@ -558,13 +437,8 @@ UploadDocumentsScreen() {
 
       <Button
         title="Selecionar certificado"
-        onPress={
-          handlePickCertificate
-        }
-        disabled={
-          loading ||
-          !canSendCertificate
-        }
+        onPress={handlePickCertificate}
+        disabled={loading || !canSendCertificate}
       />
 
       <Button
@@ -573,18 +447,11 @@ UploadDocumentsScreen() {
             ? 'Salvando...'
             : 'Salvar certificado'
         }
-        onPress={
-          handleSaveCertificate
-        }
-        disabled={
-          loading ||
-          !canSendCertificate
-        }
+        onPress={handleSaveCertificate}
+        disabled={loading || !canSendCertificate}
       />
 
-      {loading && (
-        <ActivityIndicator />
-      )}
+      {loading && <ActivityIndicator />}
     </ScrollView>
   );
 }
