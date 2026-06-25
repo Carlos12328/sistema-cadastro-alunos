@@ -144,6 +144,23 @@ export async function updateStudentCertificateUrl(
   );
 }
 
+export async function updateStudentRgUrl(
+  studentId: string,
+  rgUrl: string
+) {
+  await updateDoc(
+    doc(
+      db,
+      'alunos',
+      studentId
+    ),
+    {
+      rgUrl,
+      status: 'Pendente',
+    }
+  );
+}
+
 export function subscribeStudent(
   studentId: string,
   callback: (

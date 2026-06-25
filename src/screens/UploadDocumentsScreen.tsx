@@ -20,19 +20,24 @@ import {
 } from '../context/AuthContext';
 
 import {
-  saveCertificateLocally,
+  saveDocumentLocally,
 } from '../services/storageService';
 
 import {
   getStudentByUserId,
   updateStudentCertificateUrl,
+  updateStudentRgUrl,
 } from '../services/studentService';
+
+import { 
+  optimizeImage 
+} from '../services/imageService';
 
 import {
   Student,
 } from '../types/student';
 
-type SelectedCertificate = {
+type SelectedDocument = {
   uri: string;
   fileName?: string | null;
 };
@@ -54,7 +59,7 @@ UploadDocumentsScreen() {
   const [
     certificate,
     setCertificate,
-  ] = useState<SelectedCertificate | null>(
+  ] = useState<SelectedDocument | null>(
     null
   );
 
@@ -62,6 +67,13 @@ UploadDocumentsScreen() {
     certificateUri,
     setCertificateUri,
   ] = useState('');
+
+  const [
+    rg,
+    setRg,
+  ] = useState<SelectedDocument | null>(
+    null
+  );
 
   const [
     loading,
@@ -189,6 +201,125 @@ UploadDocumentsScreen() {
   }, [user]);
 
   async function
+  handlePickRg() {
+
+    const permission =
+      await ImagePicker.requestMediaLibraryPermissionsAsync();
+
+    if (!permission.granted) {
+      Alert.alert(
+        'Permissão necessária',
+        'Autorize o acesso à galeria.'
+      );
+      return;
+    }
+
+    const result =
+      await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: 'images',
+        allowsEditing: false,
+        quality: 1,
+      });
+
+    if (result.canceled) {
+      return;
+    }
+
+    const asset =
+      result.assets[0];
+
+    const optimizedUri =
+      await optimizeImage(asset.uri);
+
+    setRg({
+      uri: optimizedUri,
+      fileName: asset.fileName,
+    });
+  }
+
+  async function
+  handleSaveRg() {
+
+    try {
+
+      if (!user) {
+        Alert.alert(
+          'Erro',
+          'Usuário não autenticado'
+        );
+        return;
+      }
+
+      if (!rg) {
+        Alert.alert(
+          'Erro',
+          'Selecione o RG/CPF antes de salvar'
+        );
+        return;
+      }
+
+      setLoading(true);
+
+      const currentStudent =
+        await getStudentByUserId(
+          user.uid
+        );
+
+      if (
+        !currentStudent ||
+        !currentStudent.id
+      ) {
+        Alert.alert(
+          'Erro',
+          'Aluno não encontrado'
+        );
+        return;
+      }
+
+      const localUri =
+        await saveDocumentLocally({
+          userId: user.uid,
+          uri: rg.uri,
+          fileName: rg.fileName,
+        });
+
+      await updateStudentRgUrl(
+        currentStudent.id,
+        localUri
+      );
+
+      setStudent({
+        ...currentStudent,
+        rgUrl: localUri,
+        status: 'Pendente',
+      });
+
+      Alert.alert(
+        'Sucesso',
+        'RG/CPF enviado com sucesso.'
+      );
+
+      setRg(null);
+
+    } catch (error) {
+
+      console.error('Erro ao salvar RG/CPF:', error);
+
+      Alert.alert(
+        'Erro',
+        error instanceof Error
+          ? error.message
+          : 'Falha ao salvar RG/CPF'
+      );
+
+    } finally {
+
+      setLoading(false);
+
+    }
+  }
+
+  async function
   handlePickCertificate() {
 
     if (
@@ -218,9 +349,7 @@ UploadDocumentsScreen() {
 
     const result =
       await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: [
-          'images',
-        ],
+        mediaTypes: 'images',
         allowsEditing: false,
         quality: 1,
       });
@@ -234,8 +363,13 @@ UploadDocumentsScreen() {
     const asset =
       result.assets[0];
 
+    const optimizedUri =
+      await optimizeImage(
+        asset.uri
+      );
+
     setCertificate({
-      uri: asset.uri,
+      uri: optimizedUri,
       fileName: asset.fileName,
     });
   }
@@ -314,7 +448,7 @@ UploadDocumentsScreen() {
       }
 
       const localUri =
-        await saveCertificateLocally({
+        await saveDocumentLocally({
           userId: user.uid,
           uri: certificate.uri,
           fileName: certificate.fileName,
@@ -557,6 +691,11 @@ UploadDocumentsScreen() {
       ) : null}
 
       <Button
+        title="Selecionar RG/CPF"
+        onPress={handlePickRg}
+      />
+
+      <Button
         title="Selecionar certificado"
         onPress={
           handlePickCertificate
@@ -565,6 +704,40 @@ UploadDocumentsScreen() {
           loading ||
           !canSendCertificate
         }
+      />
+      {rg ? (
+        <View
+          style={{
+            alignItems: 'center',
+            gap: 8,
+          }}
+        >
+          <Text
+            style={{
+              fontWeight: 'bold',
+            }}
+          >
+            RG/CPF selecionado
+          </Text>
+
+          <Image
+            source={{
+              uri: rg.uri,
+            }}
+            style={{
+              width: 220,
+              height: 220,
+              borderRadius: 8,
+            }}
+            resizeMode="cover"
+          />
+        </View>
+      ) : null}
+
+      <Button
+        title="Salvar RG/CPF"
+        onPress={handleSaveRg}
+        disabled={loading}
       />
 
       <Button

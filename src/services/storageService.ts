@@ -1,6 +1,6 @@
 ﻿import * as FileSystem from 'expo-file-system/legacy';
 
-type SaveCertificateParams = {
+type SaveDocumentParams = {
   userId: string;
   uri: string;
   fileName?: string | null;
@@ -58,11 +58,11 @@ function getSafeFileName(
   return `${Date.now()}-${safeBaseName}.${extension}`;
 }
 
-export async function saveCertificateLocally({
+export async function saveDocumentLocally({
   userId,
   uri,
   fileName,
-}: SaveCertificateParams) {
+}: SaveDocumentParams) {
 
   if (
     !FileSystem.documentDirectory
